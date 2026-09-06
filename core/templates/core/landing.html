@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block title %}4U - Gestão de Tempo e Produtividade{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5 px-3 px-md-5">
+    <span class="text-eyebrow">Estude com foco</span>
+    <h1 class="display-4 fw-bold mt-2">Sempre <em>com você!</em></h1>
+    <p class="lead text-secondary mt-3 mx-auto" style="max-width: 620px;">
+        Organize suas tarefas, acompanhe seu progresso e mantenha o foco nos estudos.
+    </p>
+    <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{% url 'cadastro' %}" class="btn btn-primary btn-lg">Criar Conta</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Já tenho conta</a>
+    </div>
+</div>
+
+<div class="row g-4 mt-2 text-center">
+    <div class="col-md-4">
+        <div class="feature-box p-4 h-100">
+            <div class="feature-icon mb-3"><i class="bi bi-stopwatch"></i></div>
+            <h5 class="fw-semibold">Timer Pomodoro</h5>
+            <p class="text-secondary mb-0">Ative ciclos de foco personalizados e acompanhe seu histórico.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-box p-4 h-100">
+            <div class="feature-icon mb-3"><i class="bi bi-list-check"></i></div>
+            <h5 class="fw-semibold">Organização de Tarefas</h5>
+            <p class="text-secondary mb-0">Planeje, edite e conclua tarefas com etiquetas coloridas.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-box p-4 h-100">
+            <div class="feature-icon mb-3"><i class="bi bi-trophy"></i></div>
+            <h5 class="fw-semibold">Metas e Conquistas</h5>
+            <p class="text-secondary mb-0">Defina metas pessoais e desbloqueie medalhas ao evoluir.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

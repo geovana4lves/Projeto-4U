@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Evolução e Conquistas - 4U{% endblock %}
+
+{% block content %}
+<h2 class="page-title mb-4">Metas e Medalhas</h2>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h5 class="text-primary mb-3"><i class="bi bi-flag me-1"></i>Minhas Metas Pessoais</h5>
+
+            <form method="post" class="row g-2 mb-3">
+                {% csrf_token %}
+                <label class="form-label">Título</label>
+                <div class="col-12">{{ form_meta.titulo }}</div>
+                <label class="form-label">Descrição</label>
+                <div class="col-12">{{ form_meta.descricao }}</div>
+                <label class="form-label">Prazo</label>
+                <div class="col-8">{{ form_meta.prazo }}</div>
+                <div class="col-4"><button type="submit" class="btn btn-primary w-100">Adicionar</button></div>
+            </form>
+
+            <ul class="list-group list-group-flush">
+                {% for meta in metas %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ meta.titulo }}</strong><br>
+                        <small class="text-muted">Prazo: {{ meta.prazo|date:"d/m/Y" }}</small>
+                    </div>
+                    {% if meta.atingida %}
+                    <span class="badge bg-success">Atingida</span>
+                    {% else %}
+                    <form method="post" action="{% url 'concluir_meta' meta.pk %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-success">Marcar como atingida</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nenhuma meta cadastrada.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h5 class="text-primary mb-3"><i class="bi bi-trophy me-1"></i>Medalhas de Conquista</h5>
+            <div class="row">
+                {% for item in conquistas %}
+                <div class="col-6 mb-3 text-center">
+                    <div class="p-3 achievement-badge">
+                        <div class="achievement-icon">
+                            <i class="{{ item.conquista.icone }}"></i>
+                        </div>
+                        <h6 class="mb-1">{{ item.conquista.nome }}</h6>
+                        <small class="text-muted">{{ item.conquista.descricao }}</small>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted ms-3">Você ainda não possui medalhas liberadas.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <div class="row mt-6">
+            <div class="card shadow-sm border-0 p-3">
+                <h5 class="text-primary mb-3"><i class="bi bi-award me-1"></i>Catálogo de Conquistas Disponíveis</h5>
+                <div class="catalog-list">
+                    {% for c in catalogo %}
+                    <div class="catalog-item">
+                        <div class="catalog-icon">
+                            <i class="{{ c.icone }}"></i>
+                        </div>
+                        <div class="catalog-item-body">
+                            <h6>{{ c.nome }}</h6>
+                            <p>{{ c.descricao }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Nenhuma conquista cadastrada no sistema.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

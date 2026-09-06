@@ -58,3 +58,5 @@ Projeto-4U-main/
 | RF012 | Sistema de conquistas | `verificar_conquistas()` concede medalhas automaticamente (novo) |
 | RF013 | Timer Pomodoro | Widget JS no dashboard + `registrar_pomodoro` (API) |
 | RNF001 | Interface intuitiva | Bootstrap 5 + navegação consistente em `base.html` |
+| RNF002 | Tempo de resposta < 3s | Operações assíncronas (fetch) para o Pomodoro |
+| RNF003 | Compatibilidade com navegadores | Uso de Bootstrap/CSS padrão, sem recursos proprietários |

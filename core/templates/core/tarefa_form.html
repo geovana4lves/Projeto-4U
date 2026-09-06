@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if modo == 'editar' %}Editar Tarefa{% else %}Nova Tarefa{% endif %} - 4U{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card auth-card shadow-sm border-0">
+            <div class="card-body p-4">
+                <span class="text-eyebrow d-block">
+                    {% if modo == 'editar' %}Ajuste os detalhes{% else %}Planeje seu foco{% endif %}
+                </span>
+                <h3 class="card-title mt-2 mb-4">
+                    {% if modo == 'editar' %}
+                    Editar Tarefa
+                    {% else %}
+                    Nova Tarefa
+                    {% endif %}
+                </h3>
+
+                <form method="post" class="row g-2 mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="origem" value="{{ origem }}">
+
+                    {% for field in form %}
+                    <div class="col-12">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url origem %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if modo == 'editar' %}Salvar Alterações{% else %}Criar Tarefa{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

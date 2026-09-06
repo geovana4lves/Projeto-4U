@@ -1,0 +1,184 @@
+{% extends 'core/base.html' %}
+{% block title %}Pomodoro - 4U{% endblock %}
+{% block content %}
+<h2 class="page-title mb-4">Painel Principal</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <h5 class="card-title text-primary"><i class="bi bi-stopwatch me-1"></i>Timer Pomodoro</h5>
+            <div class="fw-bold" id="timer-display">00:00</div>
+            <div>
+                <button class="btn btn-success me-2" onclick="iniciarTempoPersonalizado()">Iniciar Pomodoro</button>
+                <button class="btn btn-danger" onclick="stopPomodoro()">Parar</button>
+            </div>
+            <br>
+            <div class="mb-3">
+                <label for="select-tempo" class="form-label">Escolha o tempo de foco:</label>
+                <input type="number" id="input-tempo" class="form-control" value="0" min="1" max="180">
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title text-primary mb-0"><i class="bi bi-list-check me-1"></i>Minhas Tarefas</h5>
+                <a href="{% url 'criar_tarefa' %}?origem=dashboard" class="btn btn-sm btn-primary">+ Nova</a>
+            </div>
+            <ul class="list-group list-group-flush mb-3">
+                {% for tarefa in tarefas %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span
+                            style="border-left: 4px solid {% if tarefa.cor_etiqueta %}{{ tarefa.cor_etiqueta }}{% else %}#000{% endif %}; padding-left: 8px;">
+                            {{ tarefa.titulo }}
+                        </span>
+                        <span class="badge bg-secondary">{{ tarefa.tempo_estimado_minutos }} min</span>
+                    </div>
+                    <div class="mt-2 d-flex gap-2">
+                        <form method="post" action="{% url 'concluir_tarefa' tarefa.pk %}" class="m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="origem" value="dashboard">
+                            <button type="submit" class="btn btn-sm btn-outline-success">Concluir</button>
+                        </form>
+                        <a href="{% url 'editar_tarefa' tarefa.pk %}?origem=dashboard"
+                            class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <form method="post" action="{% url 'excluir_tarefa' tarefa.pk %}" class="m-0"
+                            onsubmit="return confirm('Excluir esta tarefa?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="origem" value="dashboard">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Nenhuma tarefa pendente.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-3">
+            <h5 class="card-title text-primary mb-3"><i class="bi bi-easel me-1"></i>Mural Pessoal</h5>
+
+            <form method="post" class="mb-3">
+                {% csrf_token %}
+                {{ form_postagem.conteudo }}
+                <button type="submit" class="btn btn-sm btn-primary mt-2">Publicar</button>
+            </form>
+
+            <div class="list-group list-group-flush">
+                {% for post in postagens %}
+                <div class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1">{{ post.conteudo }}</p>
+                        <small class="text-muted">{{ post.data_criacao|date:"d/m/Y H:i" }}</small>
+                    </div>
+
+                    <!-- Botão com o 'x' adicionado para excluir a anotação -->
+                    <form action="{% url 'excluir_postagem' post.pk %}" method="post" class="m-0 ms-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-0"
+                            title="Excluir anotação" onclick="return confirm('Deseja excluir esta anotação?');"
+                            style="font-size: 1.1rem; line-height: 1;">
+                            &times;
+                        </button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-muted">Nenhum recado no mural.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    let timer;
+    let isRunning = false;
+
+    function iniciarTempoPersonalizado() {
+        if (isRunning) return;
+
+        const inputElement = document.getElementById('input-tempo');
+        let minutos = parseInt(inputElement.value);
+
+        if (!minutos || minutos <= 0) {
+            alert('Por favor, insira um tempo válido em minutos.');
+            return;
+        }
+
+        startPomodoro(minutos);
+    }
+
+    function startPomodoro(minutes) {
+        if (isRunning) return;
+        isRunning = true;
+        let seconds = minutes * 60;
+        const display = document.getElementById('timer-display');
+
+        display.textContent = `${minutes < 10 ? '0' : ''}${minutes}:00`;
+
+        clearInterval(timer);
+        timer = setInterval(() => {
+            let min = Math.floor(seconds / 60);
+            let sec = seconds % 60;
+            display.textContent = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+            if (--seconds < 0) {
+                clearInterval(timer);
+                isRunning = false;
+
+                tocarAlarme();
+                salvarCicloPomodoro(minutes);
+            }
+        }, 1000);
+    }
+
+    function stopPomodoro() {
+        clearInterval(timer);
+        isRunning = false;
+        document.getElementById('timer-display').textContent = '00:00';
+    }
+
+    function tocarAlarme() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscilador = audioCtx.createOscillator();
+            const ganho = audioCtx.createGain();
+
+            oscilador.type = 'sine';
+            oscilador.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+            ganho.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+            oscilador.connect(ganho);
+            ganho.connect(audioCtx.destination);
+
+            oscilador.start();
+            oscilador.stop(audioCtx.currentTime + 0.6);
+        } catch (e) {
+            console.log("Áudio não suportado.");
+        }
+    }
+
+    function salvarCicloPomodoro(duracaoMinutos) {
+        fetch('/api/pomodoro/registrar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ duracao: duracaoMinutos })
+        })
+            .then(response => response.json())
+            .then(data => alert('Ciclo de Foco registrado no servidor!'));
+    }
+</script>
+{% endblock %}
